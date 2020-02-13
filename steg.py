@@ -9,6 +9,7 @@ def  load_image_bytes(file_name):
     image_bytes = cv2.imread(file_name, cv2.IMREAD_COLOR)
     return image_bytes.flatten()
 
+
 # function that saves the bytes of an image
 # input:    probably an output name and the bytes (where bytes are
 #                               probably a flattened numpy array)
@@ -16,7 +17,6 @@ def  load_image_bytes(file_name):
 def save_image_bytes(file_name, image_dim, image_bytes):
     pixels = image_bytes.reshape((image_dim[0], image_dim[1], 3))
     cv2.imwrite(file_name, pixels)
-
 
 
 # function that loads a .txt file and returns its bytes
@@ -35,33 +35,14 @@ def load_text_bytes(file_name):
 # input:    byte list
 # output:   bit list
 def bits_from_bytes(byte_list):
-    bits = [int(bit)  for byte in byte_list for bit in bin(byte)[2:].zfill(8)]
+    bits = [int(bit) for byte in byte_list for bit in bin(byte)[2:].zfill(8)]
     return bits
-
-
 
 
 # function that takes in a list of "cover" bytes and "message" bits
 #       and encodes those bits into the LSB of the cover bytes
 # input:    byte list, bit list
 # output:   byte list
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
