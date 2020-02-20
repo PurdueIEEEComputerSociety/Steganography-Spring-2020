@@ -31,6 +31,11 @@ def load_text_bytes(file_name):
     return text_bytes
 
 
+def save_text_bytes(file_name, file_bytes):
+    with open(file_name, 'wb') as f:
+        f.write(file_bytes)
+
+
 # function that takes in a list of bytes and returns a list where each
 #       element is a bit
 # input:    byte list
@@ -50,6 +55,7 @@ def get_steg_bytes(byte_list, num_bits):
         byte += str(byte_list[b] & 1)
         if len(byte) == 8:
             steg_bytes.append(np.uint8(int('{:<08s}'.format(byte), 2)))
+            byte = ''
     return np.array(steg_bytes)
 
 
@@ -69,9 +75,10 @@ if __name__=="__main__":
     message_out_fn = "message2.txt"
 
     (cover_bytes,_) = load_image_bytes(cover_fn)
-    message_bytes = get_steg_bytes(cover_bytes)
+    message_bytes = get_steg_bytes(cover_bytes, 998592)
 
-    
+    save_text_bytes(message_out_fn, message_bytes)
+
     #image_fn = "donut.png"
     #message_fn = "message.txt"
     #output_fn = "output.png"
@@ -83,20 +90,3 @@ if __name__=="__main__":
     #lsb_bytes = get_lsb_bytes(image_bytes, message_bits)
 
     #save_image_bytes(output_fn, output_dim, lsb_bytes)
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
