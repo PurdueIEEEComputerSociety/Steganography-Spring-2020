@@ -48,7 +48,7 @@ def bits_from_bytes(byte_list):
 #       in those bytes
 # input:    byte list, number of bits encoded
 # output:   byte list (LSBs from cove file)
-def get_steg_bytes(byte_list, num_bits):
+def decode_bytes(byte_list, num_bits):
     steg_bytes = []
     byte = ''
     for b in range(num_bits):
@@ -63,11 +63,13 @@ def get_steg_bytes(byte_list, num_bits):
 #       and encodes those bits into the LSB of the cover bytes
 # input:    byte list, bit list
 # output:   byte list
-def get_lsb_bytes(cover_bytes, message_bits):
+def encode_bytes(cover_bytes, message_bits):
     lsb_bytes = cover_bytes.copy()
     for idx, b in enumerate(message_bits):
         lsb_bytes[idx] = (lsb_bytes[idx] & ~1) | b
     return lsb_bytes
+
+
 
 if __name__=="__main__":
 
@@ -75,7 +77,7 @@ if __name__=="__main__":
     message_out_fn = "message2.txt"
 
     (cover_bytes,_) = load_image_bytes(cover_fn)
-    message_bytes = get_steg_bytes(cover_bytes, 998592)
+    message_bytes = decode_bytes(cover_bytes, 998592)
 
     save_text_bytes(message_out_fn, message_bytes)
 
@@ -87,6 +89,6 @@ if __name__=="__main__":
     #message_bytes = load_text_bytes(message_fn)
     #message_bits = bits_from_bytes(message_bytes)
 
-    #lsb_bytes = get_lsb_bytes(image_bytes, message_bits)
+    #lsb_bytes = encode_bytes(image_bytes, message_bits)
 
     #save_image_bytes(output_fn, output_dim, lsb_bytes)
