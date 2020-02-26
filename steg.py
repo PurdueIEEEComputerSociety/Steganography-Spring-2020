@@ -50,12 +50,20 @@ def bits_from_bytes(byte_list):
 # output:   byte list (LSBs from cove file)
 def decode_bytes(byte_list, num_bits, num_lsb=1):
     steg_bytes = []
+
+    current_lsb = num_lsb - 1
+    cover_idx = 0
     byte = ''
     for b in range(num_bits):
-        byte += str(byte_list[b] & 1)
+        byte += str((byte_list[cover_idx] & (1 << current_lsb)) >> current_lsb)
         if len(byte) == 8:
             steg_bytes.append(np.uint8(int(byte, 2)))
             byte = ''
+        if current_lsb == 0:
+            current_lsb = num_lsb - 1
+            cover_idx += 1
+        else:
+            current_lsb -= 1
     return np.array(steg_bytes)
 
 
@@ -87,15 +95,20 @@ if __name__=="__main__":
         png_filename =      input("PNG filename:\t\t\t")
         message_filename =  input("Message filename:\t\t")
         output_filename =   input("Output filename:\t\t")
-        num_lsb_change =    int(input("Number of LSBs to change:\t"))
+        num_lsb_change =    eval(input("Number of LSBs to change:\t"))
         
         image_bytes, output_dim = load_image_bytes(png_filename)
         message_bytes = load_text_bytes(message_filename)
         message_bits = bits_from_bytes(message_bytes)
 
-        lsb_bytes = encode_bytes(image_bytes, message_bits, num_lsb=num_lsb_change)
-
-        save_image_bytes(output_filename, output_dim, lsb_bytes)
+        if type(num_lsb_change) == int:
+            lsb_bytes = encode_bytes(image_bytes, message_bits, num_lsb=num_lsb_change)
+            save_image_bytes(output_filename, output_dim, lsb_bytes)
+        else:
+            start, stop = num_lsb_change
+            for i in range(start, stop+1):
+                lsb_bytes = encode_bytes(image_bytes, message_bits, num_lsb=i)
+                save_image_bytes(output_filename[:-4] + str(i) + ".png", output_dim, lsb_bytes)
     if choice == 2:
         cover_fn = input("Cover filename:\t")
         message_out_fn = input("Message output filename:\t")
