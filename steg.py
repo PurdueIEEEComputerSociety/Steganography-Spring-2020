@@ -6,7 +6,7 @@ import numpy as np
 # output:   a one-dimensional array of the integer repr. of the rgb
 #               channels in an image file
 # hint:     use opencv2
-def  load_image_bytes(file_name):
+def load_image_bytes(file_name):
     image_bytes = cv2.imread(file_name, cv2.IMREAD_COLOR)
     return (image_bytes.flatten(), image_bytes.shape)
 
@@ -48,13 +48,13 @@ def bits_from_bytes(byte_list):
 #       in those bytes
 # input:    byte list, number of bits encoded
 # output:   byte list (LSBs from cove file)
-def decode_bytes(byte_list, num_bits):
+def decode_bytes(byte_list, num_bits, num_lsb=1):
     steg_bytes = []
     byte = ''
     for b in range(num_bits):
         byte += str(byte_list[b] & 1)
         if len(byte) == 8:
-            steg_bytes.append(np.uint8(int('{:<08s}'.format(byte), 2)))
+            steg_bytes.append(np.uint8(int(byte, 2)))
             byte = ''
     return np.array(steg_bytes)
 
@@ -63,32 +63,48 @@ def decode_bytes(byte_list, num_bits):
 #       and encodes those bits into the LSB of the cover bytes
 # input:    byte list, bit list
 # output:   byte list
-def encode_bytes(cover_bytes, message_bits):
+def encode_bytes(cover_bytes, message_bits, num_lsb=1):
     lsb_bytes = cover_bytes.copy()
-    for idx, b in enumerate(message_bits):
-        lsb_bytes[idx] = (lsb_bytes[idx] & ~1) | b
+
+    current_lsb = num_lsb - 1
+    cover_idx = 0
+    for b in message_bits:
+        lsb_bytes[cover_idx] = (lsb_bytes[cover_idx] & ~(1 << current_lsb)) | (b << current_lsb)
+
+        if current_lsb == 0:
+            current_lsb = num_lsb - 1
+            cover_idx += 1
+        else:
+            current_lsb -= 1
+    print("%d bits encoded." % len(message_bits))
     return lsb_bytes
 
 
 
 if __name__=="__main__":
+    choice = int(input("(1) Encode text in PNG\n(2) Decode text from PNG\n"))
+    if choice == 1:
+        png_filename =      input("PNG filename:\t\t\t")
+        message_filename =  input("Message filename:\t\t")
+        output_filename =   input("Output filename:\t\t")
+        num_lsb_change =    int(input("Number of LSBs to change:\t"))
+        
+        image_bytes, output_dim = load_image_bytes(png_filename)
+        message_bytes = load_text_bytes(message_filename)
+        message_bits = bits_from_bytes(message_bytes)
 
-    cover_fn = "output.png"
-    message_out_fn = "message2.txt"
+        lsb_bytes = encode_bytes(image_bytes, message_bits, num_lsb=num_lsb_change)
 
-    (cover_bytes,_) = load_image_bytes(cover_fn)
-    message_bytes = decode_bytes(cover_bytes, 998592)
+        save_image_bytes(output_filename, output_dim, lsb_bytes)
+    if choice == 2:
+        cover_fn = input("Cover filename:\t")
+        message_out_fn = input("Message output filename:\t")
+        num_bits_encoded = int(input("Number of encoded bits:\t"))
+        num_lsb_decode =    int(input("Number of LSBs to decode:\t"))
 
-    save_text_bytes(message_out_fn, message_bytes)
+        (cover_bytes, image_dim) = load_image_bytes(cover_fn)
+        message_bytes = decode_bytes(cover_bytes, num_bits_encoded, num_lsb=num_lsb_decode)
 
-    #image_fn = "donut.png"
-    #message_fn = "message.txt"
-    #output_fn = "output.png"
-
-    #image_bytes, output_dim = load_image_bytes(image_fn)
-    #message_bytes = load_text_bytes(message_fn)
-    #message_bits = bits_from_bytes(message_bytes)
-
-    #lsb_bytes = encode_bytes(image_bytes, message_bits)
-
-    #save_image_bytes(output_fn, output_dim, lsb_bytes)
+        save_text_bytes(message_out_fn, message_bytes)
+        
+    
