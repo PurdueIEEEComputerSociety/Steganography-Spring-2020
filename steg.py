@@ -72,6 +72,9 @@ def decode_bytes(byte_list, num_bits, num_lsb=1):
 # input:    byte list, bit list
 # output:   byte list
 def encode_bytes(cover_bytes, message_bits, num_lsb=1):
+    if (num_lsb * len(cover_bytes)) < len(message_bits):
+        print("%d bits cannot be encoded in %d bytes, best is %d." % (len(message_bits), len(cover_bytes), (len(message_bits) // len(cover_bytes))+1))
+        return
     lsb_bytes = cover_bytes.copy()
 
     current_lsb = num_lsb - 1
@@ -90,15 +93,19 @@ def encode_bytes(cover_bytes, message_bits, num_lsb=1):
 
 
 if __name__=="__main__":
-    choice = int(input("(1) Encode text in PNG\n(2) Decode text from PNG\n"))
+    choice = int(input("(1) Encode file in PNG\n(2) Decode file from PNG\n"))
     if choice == 1:
-        png_filename =      input("PNG filename:\t\t\t")
+        png_filename =      input("Cover PNG filename:\t\t")
         message_filename =  input("Message filename:\t\t")
         output_filename =   input("Output filename:\t\t")
         num_lsb_change =    eval(input("Number of LSBs to change:\t"))
         
         image_bytes, output_dim = load_image_bytes(png_filename)
-        message_bytes = load_text_bytes(message_filename)
+        if message_filename[:-3] == "txt":
+            message_bytes = load_text_bytes(message_filename)
+        else:
+            (message_bytes, message_dim) = load_image_bytes(message_filename)
+
         message_bits = bits_from_bytes(message_bytes)
 
         if type(num_lsb_change) == int:
@@ -118,6 +125,10 @@ if __name__=="__main__":
         (cover_bytes, image_dim) = load_image_bytes(cover_fn)
         message_bytes = decode_bytes(cover_bytes, num_bits_encoded, num_lsb=num_lsb_decode)
 
-        save_text_bytes(message_out_fn, message_bytes)
+        if message_out_fn[:-3] == "txt":
+            save_text_bytes(message_out_fn, message_bytes)
+        else:
+            output_dim = eval(input("Enter output PNG dimensions:\t"))
+            save_image_bytes(message_out_fn, output_dim, message_bytes)
         
     
