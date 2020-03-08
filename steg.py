@@ -101,7 +101,7 @@ if __name__=="__main__":
         num_lsb_change =    eval(input("Number of LSBs to change:\t"))
         
         image_bytes, output_dim = load_image_bytes(png_filename)
-        if message_filename[:-3] == "txt":
+        if message_filename[-3:] == "txt":
             message_bytes = load_text_bytes(message_filename)
         else:
             (message_bytes, message_dim) = load_image_bytes(message_filename)
@@ -125,7 +125,7 @@ if __name__=="__main__":
         (cover_bytes, image_dim) = load_image_bytes(cover_fn)
         message_bytes = decode_bytes(cover_bytes, num_bits_encoded, num_lsb=num_lsb_decode)
 
-        if message_out_fn[:-3] == "txt":
+        if message_out_fn[-3:] == "txt":
             save_text_bytes(message_out_fn, message_bytes)
         else:
             output_dim = eval(input("Enter output PNG dimensions:\t"))
